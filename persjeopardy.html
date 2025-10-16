@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Personality Jeopardy – Monologue Practice</title>
+<style>
+    * { box-sizing: border-box; }
+    body { 
+        margin: 0; 
+        padding: 20px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        font-family: 'Arial', sans-serif;
+        min-height: 100vh;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    h1 {
+        text-align: center;
+        color: #ffd700;
+        font-size: 3em;
+        text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+        margin: 0 0 40px 0;
+        letter-spacing: 2px;
+    }
+    .jeopardy-board {
+        background: #001a4d;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    }
+    .category-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    .category-header {
+        background: linear-gradient(180deg, #003d99 0%, #002966 100%);
+        color: #ffd700;
+        padding: 25px 15px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.3em;
+        border-radius: 8px;
+        border: 3px solid #ffd700;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+    }
+    .cell-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
+    }
+    .cell {
+        background: linear-gradient(180deg, #003d99 0%, #002966 100%);
+        color: #ffd700;
+        border: 3px solid #ffd700;
+        padding: 40px 20px;
+        text-align: center;
+        font-size: 2.5em;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(255,215,0,0.3), inset 0 2px 5px rgba(255,255,255,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 120px;
+    }
+    .cell:hover:not(.solved) {
+        background: linear-gradient(180deg, #0052cc 0%, #003d99 100%);
+        transform: scale(1.08);
+        box-shadow: 0 8px 25px rgba(255,215,0,0.6), inset 0 2px 5px rgba(255,255,255,0.2);
+    }
+    .cell:active:not(.solved) {
+        transform: scale(0.98);
+    }
+    .cell.solved {
+        background: #1a1a1a;
+        color: #444;
+        border-color: #444;
+        cursor: default;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .cell.solved:hover {
+        transform: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    #modal-bg {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        z-index: 10;
+    }
+
+    #modal {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(180deg, #001a4d 0%, #003d99 100%);
+        border-radius: 15px;
+        width: 90%;
+        max-width: 700px;
+        padding: 40px;
+        z-index: 20;
+        display: none;
+        border: 4px solid #ffd700;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.95);
+        max-height: 85vh;
+        overflow-y: auto;
+        font-size: 1.1em;
+    }
+
+    #modal h2 {
+        margin: 0 0 30px 0;
+        font-size: 2em;
+        color: #ffd700;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    #vocab {
+        margin: 20px 0 20px 0;
+        line-height: 1.8;
+        color: #fff;
+        padding: 15px;
+        background: rgba(255,215,0,0.1);
+        border-left: 4px solid #ffd700;
+        border-radius: 4px;
+    }
+
+    #vocab b {
+        color: #ffd700;
+    }
+
+    #q {
+        margin: 20px 0 20px 0;
+        line-height: 1.8;
+        font-size: 1.2em;
+        color: #fff;
+        padding: 15px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 4px;
+    }
+
+    #q b {
+        color: #ffd700;
+    }
+
+    #grammar {
+        margin: 20px 0 30px 0;
+        font-style: italic;
+        color: #ffd700;
+        padding: 15px;
+        background: rgba(255,215,0,0.1);
+        border-radius: 4px;
+    }
+
+    #grammar b {
+        color: #ffd700;
+    }
+
+    #timer {
+        font-size: 3.5em;
+        font-weight: bold;
+        color: #ff4444;
+        text-align: center;
+        margin-top: 30px;
+        text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+        letter-spacing: 4px;
+    }
+
+    .close-btn {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 2.5em;
+        cursor: pointer;
+        color: #ffd700;
+        background: none;
+        border: none;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        line-height: 1;
+        transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+        color: #ff4444;
+        transform: scale(1.2);
+    }
+
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        .jeopardy-board {
+            padding: 15px;
+        }
+        .category-row, .cell-row {
+            gap: 8px;
+        }
+        .category-header {
+            font-size: 0.9em;
+            padding: 15px 10px;
+            min-height: 60px;
+        }
+        .cell {
+            font-size: 1.5em;
+            padding: 20px 10px;
+            min-height: 80px;
+        }
+        #modal {
+            width: 95%;
+            padding: 25px;
+        }
+        #modal h2 {
+            font-size: 1.4em;
+        }
+        #timer {
+            font-size: 2.5em;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>PERSONALITY JEOPARDY!</h1>
+    
+    <div class="jeopardy-board">
+        <div class="category-row">
+            <div class="category-header">Character Traits</div>
+            <div class="category-header">First Impressions</div>
+            <div class="category-header">Role Models</div>
+            <div class="category-header">Inner Conflicts</div>
+            <div class="category-header">Personal Growth</div>
+        </div>
+        <div id="cells"></div>
+    </div>
+</div>
+
+<div id="modal-bg"></div>
+<div id="modal">
+    <button class="close-btn" onclick="closeModal()">&times;</button>
+    <h2 id="modal-cat"></h2>
+    <div id="vocab"></div>
+    <div id="q"></div>
+    <div id="grammar"></div>
+    <div id="timer"></div>
+</div>
+
+<script>
+const data = [
+    // Category: Character Traits
+    [
+        {
+            vocab: "outgoing, reserved, generous, stubborn",
+            question: "Describe yourself or someone you know using at least two of these traits.",
+            grammar: "Simple present",
+        },
+        {
+            vocab: "optimistic, cautious, ambitious, impatient",
+            question: "Share a time when being one of these helped or hurt you.",
+            grammar: "Past simple / Present perfect",
+        },
+        {
+            vocab: "reliable, arrogant, witty, moody",
+            question: "Can someone change their core character traits? Why/why not?",
+            grammar: "Modal verbs (can/might)",
+        },
+        {
+            vocab: "down-to-earth, narrow-minded, self-confident, absent-minded",
+            question: "If you could eliminate one negative trait in people, which would it be?",
+            grammar: "Second conditional",
+        },
+        {
+            vocab: "open-minded, self-conscious, quick-tempered, considerate",
+            question: "Describe a situation where someone's personality surprised you.",
+            grammar: "Relative clauses / Past perfect",
+        },
+    ],
+    // Category: First Impressions
+    [
+        {
+            vocab: "appearance, handshake, polite, nervous",
+            question: "What details do you notice first when meeting someone?",
+            grammar: "Simple present",
+        },
+        {
+            vocab: "attitude, smile, dress, confident",
+            question: "Talk about a time your first impression was totally wrong.",
+            grammar: "Past simple / Present perfect",
+        },
+        {
+            vocab: "prejudiced, attentive, suspicious, honest",
+            question: "Why are first impressions sometimes misleading?",
+            grammar: "Modal verbs (can/might/must)",
+        },
+        {
+            vocab: "judgmental, reserved, outgoing, insecure",
+            question: "How would you act if an important first impression depended on you?",
+            grammar: "Second conditional",
+        },
+        {
+            vocab: "intuitive, observant, accurate, superficial",
+            question: "Describe a person whose first impression doesn't match their real self.",
+            grammar: "Relative clauses / Perfect tenses",
+        },
+    ],
+    // Category: Role Models
+    [
+        {
+            vocab: "hero, admire, respect, inspire",
+            question: "Who is your role model and why?",
+            grammar: "Simple present",
+        },
+        {
+            vocab: "mentor, guidance, support, influence",
+            question: "Talk about someone whose support helped you in life.",
+            grammar: "Past simple / Present perfect",
+        },
+        {
+            vocab: "famous, successful, courageous, determined",
+            question: "What qualities does a good role model have?",
+            grammar: "Modal verbs (should/must)",
+        },
+        {
+            vocab: "generosity, perseverance, honesty, empathy",
+            question: "If you could meet your hero, what would you ask?",
+            grammar: "Second conditional",
+        },
+        {
+            vocab: "break stereotypes, overcome obstacles, inspire others, remain humble",
+            question: "Describe a time when you or someone you know overcame a big challenge, inspired by a role model.",
+            grammar: "Perfect tenses / Relative clauses",
+        },
+    ],
+    // Category: Inner Conflicts
+    [
+        {
+            vocab: "decision, dilemma, confused, emotion",
+            question: "Share about a difficult decision you had to make.",
+            grammar: "Past simple",
+        },
+        {
+            vocab: "regret, responsibility, temptation, uncertain",
+            question: "When does regret help a person grow?",
+            grammar: "Present simple / Present perfect",
+        },
+        {
+            vocab: "doubt, fear, desire, logic",
+            question: "Why do people struggle with inner conflicts?",
+            grammar: "Modal verbs (might/can)",
+        },
+        {
+            vocab: "conscience, loyalty, pressure, insecurity",
+            question: "If you saw a friend cheating, would you say something?",
+            grammar: "Second conditional",
+        },
+        {
+            vocab: "self-reflection, learn from mistakes, moral choice, accept flaws",
+            question: "Describe a conflict you resolved thanks to someone's advice or your own growth.",
+            grammar: "Relative clauses / Perfect tenses",
+        },
+    ],
+    // Category: Personal Growth
+    [
+        {
+            vocab: "change, learn, challenge, adapt",
+            question: "What skills have you developed in the last year?",
+            grammar: "Present perfect",
+        },
+        {
+            vocab: "fail, improve, effort, persistence",
+            question: "Talk about a failure that made you stronger.",
+            grammar: "Past simple / Present perfect",
+        },
+        {
+            vocab: "motivation, discipline, sacrifice, attitude",
+            question: "What motivates people to change themselves?",
+            grammar: "Modal verbs (can/might)",
+        },
+        {
+            vocab: "transform, overcome, resilience, opportunity",
+            question: "If you could change one thing about your personality, what would it be?",
+            grammar: "Second conditional",
+        },
+        {
+            vocab: "realize potential, experience, achieve, lifelong learning",
+            question: "Describe a personal achievement that changed your perspective.",
+            grammar: "Perfect tenses / Relative clauses",
+        },
+    ],
+];
+
+function makeCells() {
+    let html = '';
+    for (let i = 0; i < 5; i++) {
+        html += '<div class="cell-row">';
+        for (let j = 0; j < 5; j++) {
+            const points = (i + 1) * 100;
+            html += `<div class="cell" data-i="${i}" data-j="${j}" onclick="showQuestion(${j},${i})">${points}</div>`;
+        }
+        html += '</div>';
+    }
+    document.getElementById('cells').innerHTML = html;
+}
+
+makeCells();
+
+let timerInt = null;
+
+function showQuestion(cat, lev) {
+    if (!data[cat] || !data[cat][lev]) {
+        console.error('Invalid category or level');
+        return;
+    }
+
+    const entry = data[cat][lev];
+    const categoryName = document.getElementsByClassName('category-header')[cat].textContent;
+    const points = (lev + 1) * 100;
+    
+    document.getElementById('modal-cat').textContent = categoryName + " — " + points + " points";
+    document.getElementById('vocab').innerHTML = "<b>Vocabulary:</b> " + entry.vocab;
+    document.getElementById('q').innerHTML = "<b>Task:</b> " + entry.question;
+    document.getElementById('grammar').innerHTML = "<b>Target grammar:</b> " + entry.grammar;
+    
+    startTimer(20);
+
+    document.getElementById('modal-bg').style.display = 'block';
+    document.getElementById('modal').style.display = 'block';
+
+    const cell = document.querySelector('.cell[data-i="' + lev + '"][data-j="' + cat + '"]');
+    if (cell) {
+        cell.classList.add('solved');
+    }
+}
+
+function closeModal() {
+    document.getElementById('modal-bg').style.display = 'none';
+    document.getElementById('modal').style.display = 'none';
+    clearInterval(timerInt);
+}
+
+function startTimer(secs) {
+    let t = secs;
+    document.getElementById('timer').textContent = t + "s";
+    clearInterval(timerInt);
+    timerInt = setInterval(() => {
+        t--;
+        document.getElementById('timer').textContent = t + "s";
+        if (t <= 0) {
+            clearInterval(timerInt);
+            document.getElementById('timer').textContent = "Time's up!";
+        }
+    }, 1000);
+}
+
+document.getElementById('modal-bg').onclick = closeModal;
+</script>
+
+</body>
+</html>
