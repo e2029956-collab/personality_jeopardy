@@ -591,7 +591,7 @@ function showQuestion(cat, lev) {
     currentPoints = coinValues[lev];
     selectedTeam = null;
     
-    document.getElementById('modal-cat').textContent = categoryName + " — " + currentPoints + " POLYCOINS";
+    document.getElementById('modal-cat').textContent = categoryName + " — " + currentPoints + " POLYCOIN" + (currentPoints > 1 ? "S" : "");
     document.getElementById('vocab').innerHTML = "<b>Vocabulary:</b> " + entry.vocab;
     document.getElementById('q').innerHTML = "<b>Task:</b> " + entry.question;
     document.getElementById('grammar').innerHTML = "<b>Target grammar:</b> " + entry.grammar;
@@ -617,8 +617,9 @@ function selectTeam(teamNum) {
     
     // Add points to selected team
     const pointsElement = document.getElementById(`team${teamNum}-points`);
-    const currentPoints = parseInt(pointsElement.textContent) || 0;
-    pointsElement.textContent = currentPoints + window.currentPoints;
+    const prevPoints = parseInt(pointsElement.textContent) || 0;
+    const newPoints = prevPoints + currentPoints;
+    pointsElement.textContent = newPoints;
     
     // Close modal after 1 second
     setTimeout(() => {
